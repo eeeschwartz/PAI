@@ -27,7 +27,7 @@ async function sendNotification(title: string, message: string, priority: string
 }
 
 async function testStopHook() {
-  const stopHookPath = '/Users/daniel/.claude/hooks/stop-hook.ts';
+  const stopHookPath = '/Users/erikschwartz/code/PAI/.claude/hooks/stop-hook.ts';
 
   console.error('\n🔍 Testing stop-hook configuration...');
 
