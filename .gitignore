@@ -51,7 +51,7 @@ temp/
 # Build outputs
 dist/
 build/
-out/
+out
 
 # Cache
 .cache/
@@ -61,3 +61,7 @@ out/
 private/
 secrets/
 credentials/
+.claude/shell-snapshots/
+.claude/statsig/
+.claude/ide/
+.claude/todos/
