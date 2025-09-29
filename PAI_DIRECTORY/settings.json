@@ -4,7 +4,7 @@
     "MCP_API_KEY": "REDACTED",
     "DISABLE_INTERLEAVED_THINKING": "true",
     "DA": "Kai",
-    "PAI_DIR": "/Users/daniel/.claude"
+    "PAI_DIR": "/Users/erikschwartz/code/PAI-23/PAI_DIRECTORY"
   },
   "permissions": {
     "allow": [
@@ -170,7 +170,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bash ${PAI_DIR}/statusline-command.sh"
+    "command": "bash /Users/erikschwartz/code/PAI-23/PAI_DIRECTORY/statusline-command.sh"
   },
   "feedbackSurveyState": {
     "lastShownTime": 1754071370324

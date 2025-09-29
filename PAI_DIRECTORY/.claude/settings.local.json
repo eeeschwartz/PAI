@@ -1,0 +1,16 @@
+{
+  "enabledMcpjsonServers": [
+  ],
+  "disabledMcpjsonServers": [
+      "brightdata",
+    "stripe",
+    "Ref",
+    "apify",
+    "playwright",
+    "httpx",
+    "content",
+    "daemon",
+    "Foundry",
+    "naabu"
+  ]
+}
