@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mcp-workspace:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+      - /var/run/docker.sock:/var/run/docker-host.sock
+      - mcp-cache:/home/vscode/.cache
+      - mcp-npm:/home/vscode/.npm
+      - mcp-config:/home/vscode/.config
+    environment:
+      - TZ=America/Los_Angeles
+      - DOCKER_HOST=unix:///var/run/docker-host.sock
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    networks:
+      - mcp-network
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    stdin_open: true
+    tty: true
+
+networks:
+  mcp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  mcp-cache:
+  mcp-npm:
+  mcp-config:
