@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
 
 import { readFileSync } from 'fs';
+import { join } from 'path';
+import { homedir } from 'os';
 
 /**
  * Generate 4-word tab title summarizing what was done
@@ -128,16 +130,41 @@ function setTerminalTabTitle(title: string): void {
   }
 }
 
-// Simple voice mappings
-const VOICES = {
-  researcher: 'AXdMgz6evoL7OPd7eU12',
-  pentester: 'hmMWXCj9K7N5mCPcRkfC',
-  engineer: 'kmSVBPu7loj4ayNinwWM',
-  designer: 'ZF6FPAbjXT4488VcRRnw',
-  architect: 'muZKMsIDGYtIkjjiUS82',
-  writer: 'gfRt6Z3Z8aTbpLfexQ7N',
-  kai: 'jqcCZkN6Knx8BJ5TBdYR'
-};
+// Load voice configuration from voices.json
+interface VoiceConfig {
+  voice_name: string;
+  rate_wpm: number;
+  rate_multiplier: number;
+  description: string;
+  type: string;
+}
+
+interface VoicesConfig {
+  default_rate: number;
+  voices: Record<string, VoiceConfig>;
+}
+
+// Load voices configuration
+let VOICE_CONFIG: VoicesConfig;
+try {
+  const voicesPath = join(homedir(), 'Library/Mobile Documents/com~apple~CloudDocs/Claude/voice-server/voices.json');
+  VOICE_CONFIG = JSON.parse(readFileSync(voicesPath, 'utf-8'));
+} catch (e) {
+  // Fallback to hardcoded config if file doesn't exist
+  console.error('⚠️ Could not load voices.json, using fallback config');
+  VOICE_CONFIG = {
+    default_rate: 175,
+    voices: {
+      kai: { voice_name: "Jamie (Premium)", rate_wpm: 263, rate_multiplier: 1.5, description: "UK Male", type: "Premium" },
+      researcher: { voice_name: "Ava (Premium)", rate_wpm: 236, rate_multiplier: 1.35, description: "US Female", type: "Premium" },
+      engineer: { voice_name: "Tom (Enhanced)", rate_wpm: 236, rate_multiplier: 1.35, description: "US Male", type: "Enhanced" },
+      architect: { voice_name: "Serena (Premium)", rate_wpm: 236, rate_multiplier: 1.35, description: "UK Female", type: "Premium" },
+      designer: { voice_name: "Isha (Premium)", rate_wpm: 236, rate_multiplier: 1.35, description: "Indian Female", type: "Premium" },
+      pentester: { voice_name: "Oliver (Enhanced)", rate_wpm: 236, rate_multiplier: 1.35, description: "UK Male", type: "Enhanced" },
+      writer: { voice_name: "Samantha (Enhanced)", rate_wpm: 236, rate_multiplier: 1.35, description: "US Female", type: "Enhanced" }
+    }
+  };
+}
 
 // Intelligent response generator - prioritizes custom COMPLETED messages
 function generateIntelligentResponse(userQuery: string, assistantResponse: string, completedLine: string): string {
@@ -332,7 +359,7 @@ async function main() {
 
   // Generate the announcement
   let message = '';
-  let voiceId = VOICES.kai; // Default to Kai's voice
+  let voiceConfig = VOICE_CONFIG.voices.kai; // Default to Kai's voice config
   let kaiHasCustomCompleted = false;
 
   // ALWAYS check Kai's response FIRST (even when agents are used)
@@ -406,7 +433,7 @@ async function main() {
       const wordCount = customText.split(/\s+/).length;
       if (customText && wordCount <= 8) {
         message = customText;
-        voiceId = VOICES[agentType.toLowerCase()] || VOICES.kai;
+        voiceConfig = VOICE_CONFIG.voices[agentType.toLowerCase()] || VOICE_CONFIG.voices.kai;
         console.error(`🗣️ AGENT CUSTOM VOICE (fallback): ${message}`);
       } else {
         // Custom completed too long, fall back to regular COMPLETED
@@ -417,7 +444,7 @@ async function main() {
             .replace(/\[AGENT:\w+\]\s*/i, '')
             .trim();
           message = generateIntelligentResponse(lastUserQuery, taskResult, completedText);
-          voiceId = VOICES[agentType.toLowerCase()] || VOICES.kai;
+          voiceConfig = VOICE_CONFIG.voices[agentType.toLowerCase()] || VOICE_CONFIG.voices.kai;
           console.error(`🎯 AGENT FALLBACK (custom too long): ${message}`);
         }
       }
@@ -437,7 +464,7 @@ async function main() {
 
         // Generate intelligent response for agent tasks
         message = generateIntelligentResponse(lastUserQuery, taskResult, completedText);
-        voiceId = VOICES[agentType.toLowerCase()] || VOICES.kai;
+        voiceConfig = VOICE_CONFIG.voices[agentType.toLowerCase()] || VOICE_CONFIG.voices.kai;
 
         console.error(`🎯 AGENT INTELLIGENT (fallback): ${message}`);
       }
@@ -446,58 +473,73 @@ async function main() {
 
   // FIRST: Send voice notification if we have a message
   if (message) {
-    // Send to voice server
+    // Send to voice server with both voice name and speech rate
     await fetch('http://localhost:8888/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: message,  // Changed from 'text' to 'message' to match server expectation
-        voice_id: voiceId  // Changed from 'voiceId' to 'voice_id' to match server expectation
+        message: message,
+        voice_name: voiceConfig.voice_name,
+        rate: voiceConfig.rate_wpm
       })
     }).catch(() => {});
-    console.error(`🔊 Voice notification sent: "${message}" with voice: ${voiceId}`);
+    console.error(`🔊 Voice notification sent: "${message}" with voice: ${voiceConfig.voice_name} at ${voiceConfig.rate_wpm} wpm (${voiceConfig.rate_multiplier}x)`);
   }
 
-  // LAST: Set the Kitty tab title with a 4-word summary of what was done
-  let completedText = '';
+  // ALWAYS set tab title to override any previous titles (like "dynamic requirements")
+  // Generate a meaningful title even if we don't have a voice message
+  let tabTitle = message || '';
 
-  // Extract completed text for better summary
-  if (isAgentTask && taskResult) {
-    const completedMatch = taskResult.match(/🎯\s*COMPLETED:\s*(.+?)$/im);
-    if (completedMatch) {
-      completedText = completedMatch[1].trim();
-    }
-  } else {
-    // Try to get completed text from Kai's response
-    const lastResponse = lines[lines.length - 1];
+  // If we don't have a message, generate a title from the last user query or completed task
+  if (!tabTitle && lastUserQuery) {
+    // Try to extract a completed line from the last assistant response
     try {
+      const lastResponse = lines[lines.length - 1];
       const entry = JSON.parse(lastResponse);
       if (entry.type === 'assistant' && entry.message?.content) {
         const content = entry.message.content.map(c => c.text || '').join(' ');
         const completedMatch = content.match(/🎯\s*COMPLETED:\s*(.+?)(?:\n|$)/im);
         if (completedMatch) {
-          completedText = completedMatch[1].trim();
+          tabTitle = completedMatch[1].trim()
+            .replace(/\*+/g, '')
+            .replace(/\[.*?\]/g, '')
+            .trim();
         }
       }
-    } catch (e) {
-      // Ignore parse errors
+    } catch (e) {}
+
+    // Fall back to generating a title from the user query
+    if (!tabTitle) {
+      tabTitle = generateTabTitle(lastUserQuery, '');
     }
   }
 
-  // ALWAYS set a tab title - even if we don't have a query, make something up
-  const tabTitle = lastUserQuery
-    ? generateTabTitle(lastUserQuery, completedText)
-    : 'Task Completed Successfully Done';
+  // Set tab title to override "dynamic requirements" or any other previous title
+  if (tabTitle) {
+    try {
+      // Escape single quotes in the message to prevent shell injection
+      const escapedTitle = tabTitle.replace(/'/g, "'\\''");
+
+      // Use printf command to set the tab title - this works in Kitty
+      const { execSync } = await import('child_process');
+      execSync(`printf '\\033]0;${escapedTitle}\\007' >&2`);
+      execSync(`printf '\\033]2;${escapedTitle}\\007' >&2`);
+      execSync(`printf '\\033]30;${escapedTitle}\\007' >&2`);
+
+      console.error(`\n🏷️ Tab title set to: "${tabTitle}"`);
+    } catch (e) {
+      console.error(`❌ Failed to set tab title: ${e}`);
+    }
+  }
 
   console.error(`📝 User query: ${lastUserQuery || 'No query found'}`);
-  console.error(`✅ Completed: ${completedText || 'No completed text found'}`);
+  console.error(`✅ Message: ${message || 'No completion message'}`)
 
-  // Do tab title update LAST as requested
-  try {
-    setTerminalTabTitle(tabTitle);
-    console.error(`\n🏷️ STOP-HOOK SUCCESS: Tab title set to: "${tabTitle}"`);
-  } catch (e) {
-    console.error(`❌ Failed to set tab title: ${e}`);
+  // Final tab title override as the very last action - use the actual completion message
+  if (message) {
+    // Use the actual completion message as the tab title
+    const finalTabTitle = message.slice(0, 50); // Limit to 50 chars for tab title
+    process.stderr.write(`\033]2;${finalTabTitle}\007`);
   }
 
   console.error(`🎬 STOP-HOOK COMPLETED SUCCESSFULLY at ${new Date().toISOString()}\n`);

@@ -7,7 +7,6 @@
 </picture>
 
 # **PAI** - Personal AI Infrastructure
-**(Pronounced "pie" 🥧)**
 
 ### **Open-source personal AI infrastructure for orchestrating your life and work**
 
@@ -36,9 +35,35 @@
 ## 🚀 **Recent Updates**
 
 > [!TIP]
-> **[🎉 v0.2.3 Released!](https://github.com/danielmiessler/PAI/releases/tag/v0.2.3)** - Complete Visibility & Portability Update
+> **[🎉 v0.2.4 Released!](https://github.com/danielmiessler/PAI/releases/tag/v0.2.4)** - README Cleanup & Organization
+
+<details>
+<summary><strong>Click to see all updates</strong></summary>
 
 <details open>
+<summary><strong>📅 October 6, 2025 - README Cleanup & Organization (v0.2.4)</strong></summary>
+
+- 📂 **Collapsed Updates**: Implemented two-level collapsing structure for updates section
+- 🎯 **Better Navigation**: Reduced visual clutter with nested `<details>` tags
+- 🧹 **Issue Management**: Closed PR #24 (voice system) after recent system changes
+- 📊 **Space Optimization**: Updates section now takes minimal vertical space
+- ✅ **Accessibility**: All information still accessible through intuitive collapse/expand
+
+</details>
+
+<details>
+<summary><strong>📅 October 2, 2025 - Voice System Update</strong></summary>
+
+- 🎙️ **Zero-Cost Voice System**: Migrated from ElevenLabs API to macOS native Premium/Enhanced voices
+- 💰 **No API Costs**: 100% offline voice synthesis using built-in macOS neural TTS
+- 🔊 **High-Quality Voices**: Uses Premium voices (Jamie, Ava, Serena, Isha) and Enhanced voices (Tom, Oliver, Samantha)
+- 🔒 **Complete Privacy**: All voice processing happens locally, no cloud services
+- ⚙️ **Centralized Config**: Voice settings managed via `voices.json` configuration file
+- 🚀 **Browser Tools Update**: Switched from Playwright to Chrome DevTools MCP for web automation
+
+</details>
+
+<details>
 <summary><strong>📅 September 28, 2025 - Complete Visibility & Portability Update (v0.2.3)</strong></summary>
 
 - 📁 **Directory Renamed**: `.claude` → `PAI_DIRECTORY` for better visibility
@@ -126,10 +151,12 @@
 - 🔧 Fixed hardcoded path issues
 - 🪝 Working on missing hooks
 
-**September 12, 2025**  
+**September 12, 2025**
 - 🧠 Dynamic resource loading system
 - ⚡ Submit-user-hook for context loading
 - 🗺️ Dynamic routing via load-dynamic-requirements
+
+</details>
 
 </details>
 
@@ -517,10 +544,9 @@ source ~/.zshrc  # or source ~/.bashrc
 # Copy environment template to PAI_DIRECTORY
 cp ${PAI_DIR}/env-example ${PAI_DIR}/.env
 
-# Add your API keys (optional but recommended)
+# Add your API keys (optional)
 vim ${PAI_DIR}/.env
-# Add: ELEVENLABS_API_KEY="your_key_here"
-# Add: OPENAI_API_KEY="your_key_here"
+# Add: OPENAI_API_KEY="your_key_here" (if using GPT integration)
 ```
 
 #### **Step 5: Launch PAI**
@@ -529,8 +555,11 @@ vim ${PAI_DIR}/.env
 # Navigate to PAI directory
 cd ${PAI_DIR}
 
-# Optional: Start voice server for audio notifications
-cd voice-server && ./install.sh && ./start.sh
+# Optional: Set up voice notifications (macOS only)
+# Download Premium/Enhanced voices from System Settings → Voice (Live Speech)
+# Then start the voice server:
+cd voice-server && bun server.ts &
+# See documentation/VOICE-SETUP-GUIDE.md for detailed setup instructions
 
 # Open Claude Code and start using PAI!
 # Your personal AI infrastructure is ready 🚀
@@ -544,9 +573,8 @@ PAI_DIR="/path/to/PAI/PAI_DIRECTORY"    # PAI's PAI_DIRECTORY (system agnostic)
 PAI_HOME="$HOME"                  # Your home directory
 
 # Optional API Keys
-ELEVENLABS_API_KEY="your_key"     # Voice synthesis
-OPENAI_API_KEY="your_key"         # GPT integration
-PORT="8888"                        # Voice server port
+OPENAI_API_KEY="your_key"         # GPT integration (optional)
+PORT="8888"                        # Voice server port (default: 8888)
 
 # Digital Assistant Customization
 DA="YourAssistantName"            # Your AI assistant's name (default: "Assistant")
