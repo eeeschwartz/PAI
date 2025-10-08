@@ -81,8 +81,12 @@ PAI/
 PAI uses environment variables for configuration:
 
 - `PAI_DIR`: PAI configuration directory
+- `PAI_HOME`: User home directory
+- `CLAUDE_CONFIG_DIR`: Claude Code configuration directory (should be set to `$PAI_DIR`)
 - `ELEVENLABS_API_KEY`: API key for voice synthesis
 - `PORT`: Voice server port (default: 8888)
+- `DA`: Digital Assistant name (default: "Assistant")
+- `DA_COLOR`: Statusline color (default: "purple")
 
 ## 📖 Quick Links
 
@@ -107,8 +111,13 @@ PAI uses environment variables for configuration:
 git clone https://github.com/yourusername/PAI.git
 cd PAI
 
-# Set PAI_DIR
+# Set environment variables (add to ~/.zshrc or ~/.bashrc)
 export PAI_DIR="$HOME/PAI/PAI_DIRECTORY"
+export PAI_HOME="$HOME"
+export CLAUDE_CONFIG_DIR="$PAI_DIR"  # Critical: tells Claude Code to use PAI_DIRECTORY
+
+# Reload shell
+source ~/.zshrc  # or ~/.bashrc
 
 # Install voice server (optional)
 cd PAI_DIRECTORY/voice-server

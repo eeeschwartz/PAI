@@ -520,19 +520,20 @@ ls -la  # See all files including PAI_DIRECTORY
 #### **Step 3: Configure PAI Directory Variable** ⚠️ **IMPORTANT**
 
 > [!IMPORTANT]
-> **You MUST configure the PAI_DIR variable to point to your PAI installation directory.**
-> This makes the PAI system completely agnostic to your installation location.
+> **You MUST configure both PAI_DIR and CLAUDE_CONFIG_DIR environment variables.**
+> These make Claude Code use PAI_DIRECTORY as its configuration directory, enabling automatic loading of your statusline, hooks, and settings.
 
 ```bash
 # Add to your shell config (~/.zshrc or ~/.bashrc)
 # Replace /path/to/PAI with YOUR actual PAI installation path
 export PAI_DIR="/path/to/PAI/PAI_DIRECTORY"  # Point to the PAI_DIRECTORY in your PAI installation
 export PAI_HOME="$HOME"  # Your home directory
+export CLAUDE_CONFIG_DIR="$PAI_DIR"  # Tell Claude Code to use PAI_DIRECTORY as config directory
 
 # Example (adjust to YOUR installation path):
 # export PAI_DIR="$HOME/Projects/PAI/PAI_DIRECTORY"
-# export PAI_DIR="$HOME/Documents/PAI/PAI_DIRECTORY"
-# export PAI_DIR="/Users/yourname/PAI/PAI_DIRECTORY"
+# export CLAUDE_CONFIG_DIR="$PAI_DIR"
+# export PAI_HOME="$HOME"
 
 # Reload your shell configuration
 source ~/.zshrc  # or source ~/.bashrc
@@ -570,7 +571,8 @@ cd voice-server && bun server.ts &
 ```bash
 # Required - MUST be configured for PAI to work properly
 PAI_DIR="/path/to/PAI/PAI_DIRECTORY"    # PAI's PAI_DIRECTORY (system agnostic)
-PAI_HOME="$HOME"                  # Your home directory
+PAI_HOME="$HOME"                        # Your home directory
+CLAUDE_CONFIG_DIR="$PAI_DIR"            # Tell Claude Code to use PAI_DIRECTORY as config directory
 
 # Optional API Keys
 OPENAI_API_KEY="your_key"         # GPT integration (optional)
@@ -582,7 +584,11 @@ DA_COLOR="purple"                 # Display color (purple, blue, green, cyan, et
 ```
 
 > [!TIP]
-> **Why PAI_DIR is Important:** The PAI_DIR variable makes the entire PAI system portable and installation-agnostic. All commands, contexts, and hooks reference `${PAI_DIR}` instead of hardcoded paths. This means you can install PAI anywhere on your system, and as long as PAI_DIR points to your `PAI_DIRECTORY`, everything will work seamlessly.
+> **Why These Variables are Critical:**
+> - **PAI_DIR**: Makes the entire PAI system portable and installation-agnostic. All commands, contexts, and hooks reference `${PAI_DIR}` instead of hardcoded paths.
+> - **CLAUDE_CONFIG_DIR**: Tells Claude Code to use PAI_DIRECTORY as its configuration directory, enabling automatic loading of statusline, hooks, and settings when Claude Code starts.
+>
+> This means you can install PAI anywhere on your system, and as long as these variables point to your `PAI_DIRECTORY`, everything will work seamlessly, including automatic statusline display and hook execution.
 
 ---
 

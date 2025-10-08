@@ -61,3 +61,11 @@ out/
 private/
 secrets/
 credentials/
+PAI_DIRECTORY/.claude.json
+PAI_DIRECTORY/.claude.json.backup
+PAI_DIRECTORY/history.jsonl
+PAI_DIRECTORY/debug
+PAI_DIRECTORY/statsig
+PAI_DIRECTORY/shell-snapshots
+PAI_DIRECTORY/todos
+PAI_DIRECTORY/projects/-Users-erikschwartz-code-PAI

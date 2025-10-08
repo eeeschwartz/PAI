@@ -28,6 +28,8 @@ cd ~/PAI
 ```bash
 # Add to your shell profile (~/.zshrc or ~/.bashrc)
 export PAI_DIR="$HOME/PAI/PAI_DIRECTORY"  # PAI infrastructure directory
+export PAI_HOME="$HOME"  # Your home directory
+export CLAUDE_CONFIG_DIR="$PAI_DIR"  # Tell Claude Code to use PAI_DIRECTORY as config directory
 export PATH="$HOME/bin:$PATH"
 
 # Reload shell
@@ -405,6 +407,8 @@ tail -f "${HOME}/Library/Logs/"*.log
 | Variable | Purpose | Default |
 |----------|---------|---------|
 | `PAI_DIR` | PAI configuration directory | `$HOME/PAI/PAI_DIRECTORY` |
+| `PAI_HOME` | User home directory | `$HOME` |
+| `CLAUDE_CONFIG_DIR` | Claude Code config directory | Should be set to `$PAI_DIR` |
 | `ELEVENLABS_API_KEY` | Voice synthesis API | None |
 | `PORT` | Voice server port | 8888 |
 | `HOOK_DEBUG` | Enable hook debugging | false |
